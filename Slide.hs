@@ -29,7 +29,7 @@ play (start, end) = do
   printBoards start end
   printAvailableMoves start
   coords <- getInputCoords
-  next <- return $ move coords start 
+  next <- return $ move start coords
   if next == end 
     then do
       resetScreen
