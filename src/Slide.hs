@@ -2,14 +2,29 @@ module Slide where
 
 import System.Console.ANSI
 import System.IO
+import qualified Data.Map as M
 
-import Board (Coords, Board (..), Tile (..), getAvailableMoves, move)
+import Board (Coords, Board (..), Tile (..), getAvailableMoves, move, getBlankCoords, getNeighbors)
 import Levels
         
-getInputCoords :: IO Coords
-getInputCoords = do
-  coords <- getLine 
-  return $ read coords
+getKeyMoveMapping :: Board -> M.Map Char Coords
+getKeyMoveMapping board = 
+  case getBlankCoords board of
+    Just coords -> buildMap coords
+    Nothing -> M.empty
+  where 
+    buildMap (x,y) = M.fromList $ map (mapF (x,y)) (getNeighbors (x,y))
+    mapF (x,y) (x',y') 
+      | x' > x = ('a', (x',y'))
+      | x' < x = ('d', (x',y'))
+      | y' > y = ('w', (x',y'))
+      | y' < y = ('s', (x',y'))
+
+getInput :: Board -> IO (Maybe Coords)
+getInput board = do
+  key <- getChar
+  keyMap <- return $ getKeyMoveMapping board
+  return $ M.lookup key keyMap
 
 resetScreen :: IO ()
 resetScreen = setCursorPosition 0 0 >> clearScreen
@@ -17,20 +32,15 @@ resetScreen = setCursorPosition 0 0 >> clearScreen
 printBoards :: Board -> Board -> IO ()
 printBoards start end = do
   putStr $ show end
-  putStrLn "---"
+  putStrLn ""
   putStrLn $ show start
-
-printAvailableMoves :: Board -> IO ()
-printAvailableMoves start = do
-  putStr $ "Available Moves " ++ concatMap show (getAvailableMoves start) ++ ":"
 
 play :: Level -> IO ()
 play (start, end) = do
   resetScreen
   printBoards start end
-  printAvailableMoves start
-  coords <- getInputCoords
-  next <- return $ move start coords
+  coords <- getInput start
+  next <- return $ maybe start (move start) coords
   if next == end 
     then do
       resetScreen
@@ -40,4 +50,5 @@ play (start, end) = do
     
 main = do
   hSetBuffering stdout NoBuffering
-  play level2
+  hSetBuffering stdin NoBuffering
+  play level1

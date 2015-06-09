@@ -4,6 +4,8 @@ module Board
   , Coords
   , getAvailableMoves
   , move
+  , getBlankCoords
+  , getNeighbors
   ) where
 
 import Data.List (find, findIndex, concatMap)
