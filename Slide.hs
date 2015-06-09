@@ -1,6 +1,5 @@
 module Slide where
 
-import Data.Tuple (swap)
 import System.Console.ANSI
 
 import Board (Coords, Board (..), Tile (..), getAvailableMoves, move)
@@ -22,7 +21,7 @@ printBoards start end = do
 
 printAvailableMoves :: Board -> IO ()
 printAvailableMoves start = do
-  putStr $ "Available Moves " ++ concatMap (show . swap) (getAvailableMoves start) ++ ":"
+  putStr $ "Available Moves " ++ concatMap show (getAvailableMoves start) ++ ":"
 
 play :: Level -> IO ()
 play (start, end) = do
@@ -30,7 +29,7 @@ play (start, end) = do
   printBoards start end
   printAvailableMoves start
   coords <- getInputCoords
-  next <- return $ move (swap coords) start 
+  next <- return $ move coords start 
   if next == end 
     then do
       resetScreen

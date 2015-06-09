@@ -8,6 +8,8 @@ module Board
 
 import Data.List (find, findIndex, concatMap)
 import Data.Maybe (isJust)
+import Data.Tuple (swap)
+
 import Utils (groupsInThree, swapInList)
 
 data Tile = G | B | R | Blank deriving (Eq)
@@ -52,10 +54,10 @@ getAvailableMoves board =
     Nothing -> []
 
 getIndex :: Coords -> Int
-getIndex (x,y) = x * 3 + y
+getIndex (y,x) = x * 3 + y
 
 getCoords :: Int -> Coords
-getCoords x = x `divMod` 3
+getCoords x = swap $ x `divMod` 3
 
 mkMove :: Coords -> Coords -> Board -> Board
 mkMove (x,y) (x',y') (Board boardList) = Board (swapInList from to boardList)
