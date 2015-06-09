@@ -16,19 +16,9 @@ instance Show Tile where
   show Blue  = "\x1b[34m*\x1b[0m"
   show _     = " "
 
-groupsIn :: Int -> [a] -> [[a]]
-groupsIn n [] = []
-groupsIn n xs = first : groupsIn n rest
-  where (first, rest) = splitAt n xs
-
-groupsInThree :: [a] -> [[a]]
-groupsInThree = groupsIn 3
-
 type Level = (Board, Board)
 
 type Coords = (Int, Int)
-
-boardListSize = (3, 3)
 
 level1 :: Level
 level1 = 
@@ -41,6 +31,15 @@ level1 =
           Red,    Green,  Blank,
           Green,  Red,    Blue  ]
   )
+
+groupsIn :: Int -> [a] -> [[a]]
+groupsIn n [] = []
+groupsIn n xs = first : groupsIn n rest
+  where (first, rest) = splitAt n xs
+
+groupsInThree :: [a] -> [[a]]
+groupsInThree = groupsIn 3
+
 
 getTileAt :: Coords -> Board -> Maybe Tile
 getTileAt coords (Board boardList) 
