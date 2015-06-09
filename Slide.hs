@@ -14,20 +14,28 @@ getInputCoords = do
 resetScreen :: IO ()
 resetScreen = setCursorPosition 0 0 >> clearScreen
 
-printGameState :: Board -> Board -> IO ()
-printGameState start end = do
-  putStrLn $ show end
+printBoards :: Board -> Board -> IO ()
+printBoards start end = do
+  putStr $ show end
+  putStrLn "---"
   putStrLn $ show start
+
+printAvailableMoves :: Board -> IO ()
+printAvailableMoves start = do
   putStr $ "Available Moves " ++ concatMap (show . swap) (getAvailableMoves start) ++ ":"
 
 play :: Level -> IO ()
 play (start, end) = do
   resetScreen
-  printGameState start end
+  printBoards start end
+  printAvailableMoves start
   coords <- getInputCoords
   next <- return $ move (swap coords) start 
   if next == end 
-    then putStrLn "You won!"
+    then do
+      resetScreen
+      printBoards next end
+      putStrLn "YOU DID IT!"
     else play (next, end)
     
 main = play level2

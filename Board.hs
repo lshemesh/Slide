@@ -15,7 +15,7 @@ data Tile = G | B | R | Blank deriving (Eq)
 newtype Board = Board [Tile] deriving (Eq)
 
 instance Show Board where
-  show (Board boardList) = unlines (map show (groupsInThree boardList))
+  show (Board boardList) = unlines (map (concatMap show) $ groupsInThree boardList)
 
 instance Show Tile where
   show G = "\x1b[32m*\x1b[0m"
@@ -36,7 +36,8 @@ getNextMove :: Coords -> Board -> Maybe Coords
 getNextMove (x,y) board = find ((flip isBlank) board) (getNeighbors (x,y))
 
 getNeighbors :: Coords -> [Coords]
-getNeighbors (x,y) = [(x,y-1), (x+1,y), (x,y+1), (x-1,y)]
+getNeighbors (x,y) = filter good [(x,y-1), (x+1,y), (x,y+1), (x-1,y)]
+  where good (x',y') = x' >= 0  && x' < 3  && y' >= 0 && y' < 3
 
 isBlank :: Coords -> Board -> Bool
 isBlank (x,y) board = maybe False (==Blank) $ getTileAt (x,y) board
