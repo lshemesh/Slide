@@ -40,7 +40,6 @@ groupsIn n xs = first : groupsIn n rest
 groupsInThree :: [a] -> [[a]]
 groupsInThree = groupsIn 3
 
-
 getTileAt :: Coords -> Board -> Maybe Tile
 getTileAt coords (Board boardList) 
   | index < 0                       = Nothing
