@@ -1,6 +1,7 @@
 module Slide where
 
 import System.Console.ANSI
+import System.IO
 
 import Board (Coords, Board (..), Tile (..), getAvailableMoves, move)
 import Levels
@@ -37,4 +38,6 @@ play (start, end) = do
       putStrLn "YOU DID IT!"
     else play (next, end)
     
-main = play level2
+main = do
+  hSetBuffering stdout NoBuffering
+  play level2
