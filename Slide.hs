@@ -1,9 +1,11 @@
 module Slide where
 
-import Data.List (find, foldl')
+import Data.List (find, foldl', findIndex, concatMap)
 import Data.Tuple (swap)
+import Data.Maybe (catMaybes, isJust)
+import System.Console.ANSI
 
-data Tile = Green | Blue | Red | Blank deriving (Eq)
+data Tile = G | B | R | Blank deriving (Eq)
 
 newtype Board = Board [Tile] deriving (Eq)
 
@@ -11,9 +13,9 @@ instance Show Board where
   show (Board boardList) = unlines (map show (groupsInThree boardList))
 
 instance Show Tile where
-  show Green = "\x1b[32m*\x1b[0m"
-  show Red   = "\x1b[31m*\x1b[0m"
-  show Blue  = "\x1b[34m*\x1b[0m"
+  show G = "\x1b[32m*\x1b[0m"
+  show R   = "\x1b[31m*\x1b[0m"
+  show B  = "\x1b[34m*\x1b[0m"
   show _     = " "
 
 type Level = (Board, Board)
@@ -23,13 +25,13 @@ type Coords = (Int, Int)
 level1 :: Level
 level1 = 
   (
-  Board [ Green,  Red,    Blank,
-          Red,    Blue,   Green,
-          Blue,   Green,  Red   ]
+  Board [ G, R, Blank,
+          R, B, G,
+          B, G, R ]
   ,
-  Board [ Red,    Blue,   Green,
-          Red,    Green,  Blank,
-          Green,  Red,    Blue  ]
+  Board [ R, B, G,
+          R, G, Blank,
+          G, R, B ]
   )
 
 groupsIn :: Int -> [a] -> [[a]]
@@ -47,7 +49,7 @@ getTileAt coords (Board boardList)
   | otherwise                       = Just (boardList !! index)
   where index = getIndex coords
 
-getNextMove :: Coords -> Board -> Maybe (Int,Int)
+getNextMove :: Coords -> Board -> Maybe Coords
 getNextMove (x,y) board = find ((flip isBlank) board) (getNeighbors (x,y))
 
 getNeighbors :: Coords -> [Coords]
@@ -56,8 +58,20 @@ getNeighbors (x,y) = [(x,y-1), (x+1,y), (x,y+1), (x-1,y)]
 isBlank :: Coords -> Board -> Bool
 isBlank (x,y) board = maybe False (==Blank) $ getTileAt (x,y) board
 
+getBlankCoords :: Board -> Maybe Coords
+getBlankCoords (Board boardList) = findIndex (==Blank) boardList >>= (\x -> return $ getCoords x)
+
+getAvailableMoves :: Board -> [Coords]
+getAvailableMoves board =
+  case getBlankCoords board of
+    Just blankCoords -> filter (isJust . ((flip getTileAt) board)) (getNeighbors blankCoords)
+    Nothing -> []
+
 getIndex :: Coords -> Int
 getIndex (x,y) = x * 3 + y
+
+getCoords :: Int -> Coords
+getCoords x = x `divMod` 3
 
 mkMove :: Coords -> Coords -> Board -> Board
 mkMove (x,y) (x',y') (Board boardList) = Board (swapInList from to boardList)
@@ -83,9 +97,13 @@ getInputCoords = do
 
 play :: Level -> IO ()
 play (start, end) = do
+  setCursorPosition 0 0
+  clearScreen
   putStrLn $ show end
   putStrLn $ show start
-  putStr "Pick a tile to move: "
+  putStr "Available Moves "
+  putStr $ concatMap (show . swap) (getAvailableMoves start)
+  putStr ":"
   coords <- getInputCoords
   next <- return $ move (swap coords) start 
   if next == end 
