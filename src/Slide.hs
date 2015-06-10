@@ -6,7 +6,7 @@ import qualified Data.Map as M
 
 import Board (Coords, Board (..), Tile (..), getAvailableMoves, move, getBlankCoords, getNeighbors)
 import Levels
-        
+
 getKeyMoveMapping :: Board -> M.Map Char Coords
 getKeyMoveMapping board = 
   case getBlankCoords board of
