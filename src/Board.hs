@@ -11,7 +11,6 @@ module Board
 import Data.List (find, findIndex, concatMap)
 import Data.Maybe (isJust)
 import Data.Tuple (swap)
-
 import Utils (groupsInThree, swapInList)
 
 data Tile = G | B | R | Blank deriving (Eq)
@@ -22,10 +21,17 @@ instance Show Board where
   show (Board boardList) = unlines (map (concatMap show) $ groupsInThree boardList)
 
 instance Show Tile where
-  show G = "\x1b[32m*\x1b[0m"
-  show R = "\x1b[31m*\x1b[0m"
-  show B = "\x1b[34m*\x1b[0m"
-  show _ = " "
+  show t = 
+    case t of
+      G -> withColor "32"
+      R -> withColor "31"
+      B -> withColor "34"
+      _ -> replicate count ' '
+    where withColor n = "\x1b[" ++ n ++ "m" ++ (replicate count chr) ++ "\x1b[0m"
+          chr         = '*'
+          count       = 8
+
+-- [a] -> [a]
 
 type Coords = (Int, Int)
 
